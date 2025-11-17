@@ -1,0 +1,63 @@
+ARG BASE_IMAGE_VERSION=v1
+FROM vaibhavgawali/dotnet-node-python-openjdk:${BASE_IMAGE_VERSION}
+
+# Metadata labels for Docker Scout
+LABEL maintainer="vaibhav@vaibhavgawali.net" \
+      version="1.0.0" \
+      description=".NET 10 MAUI Hybrid Android & Blazor Web with Node.js & Python." \
+      vendor="Vaibhav M. Gawali" \
+      org.opencontainers.image.source="https://github.com/vaibhav-gawali/dotnet-node-python-openjdk-tools-docker" \
+      org.opencontainers.image.documentation="https://github.com/vaibhav-gawali/dotnet-node-python-openjdk-tools-docker/blob/main/README.md"
+
+# Build arguments
+ARG ANDROID_SDK_VERSION=35
+ARG ANDROID_NDK_VERSION=27.1.12297006
+
+WORKDIR /workspace
+VOLUME ["/workspace"]
+
+# Install .NET workloads for Android and Blazor WebAssembly support
+RUN dotnet workload install wasm-tools --skip-manifest-update && \
+    dotnet dev-certs https --trust && \
+    rm -rf /tmp/*
+
+# Verify workload installations
+RUN dotnet workload list
+
+USER root
+# Create Android SDK directory
+RUN mkdir -p /opt/android-sdk
+
+# Download and install Android SDK Command Line Tools
+RUN cd /opt/android-sdk && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
+    unzip -q commandlinetools-linux-11076708_latest.zip && \
+    rm commandlinetools-linux-11076708_latest.zip && \
+    mkdir -p cmdline-tools/latest && \
+    mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+
+# Set Android environment variables
+ENV ANDROID_SDK_ROOT=/opt/android-sdk \
+    ANDROID_HOME=/opt/android-sdk \
+    PATH="${PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/ndk/${ANDROID_NDK_VERSION}"
+
+# Accept Android SDK licenses
+RUN mkdir -p /opt/android-sdk/licenses && \
+    echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > /opt/android-sdk/licenses/android-sdk-license
+
+# Install Android SDK components and NDK (as root)
+RUN yes 2>/dev/null | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+        "platforms;android-${ANDROID_SDK_VERSION}" \
+        "platform-tools" \
+        "ndk;${ANDROID_NDK_VERSION}" \
+        "cmake;3.31.5" \
+        "build-tools;${ANDROID_SDK_VERSION}.0.0" || true
+
+# Expose development ports
+EXPOSE 5000 5001 8080 8443 3000
+
+# Switch back to non-root user
+USER appuser
+
+# Default command
+CMD ["/bin/bash"]
