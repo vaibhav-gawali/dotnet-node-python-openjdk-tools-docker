@@ -34,10 +34,26 @@ docker build -t dotnet-node-python-openjdk:latest -f DockerFiles/Dockerfile .
 docker run -it --rm dotnet-node-python-openjdk:latest bash
 ```
 
-Mount your local workspace:
+## Common Commands
 
-```bash
-docker run -it --rm -v $(pwd):/workspace dotnet-node-python-openjdk:latest bash
+```powershell
+# Run container
+docker run -it --rm -v ${PWD}:/workspace dotnet-node-python-openjdk:latest
+
+# Run with port mapping
+docker run -it --rm -v ${PWD}:/workspace -p 8080:8080 dotnet-node-python-openjdk:latest
+
+# Execute a single command
+docker run --rm -v ${PWD}:/workspace dotnet-node-python-openjdk:latest dotnet --version
+
+# List images
+docker images dotnet-node-python-openjdk
+
+# Inspect image
+docker inspect dotnet-node-python-openjdk:latest
+
+# Check image size (Powershell)
+docker images dotnet-node-python-openjdk --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}"
 ```
 
 ## 🔧 Verify Installations
@@ -70,3 +86,4 @@ All packages included in this Docker image are subject to their respective licen
 | 3       | **Ubuntu (Base OS)** | [Official Documentation](https://ubuntu.com/)<br>[GitHub Repository](https://github.com/canonical/ubuntu.com)<br>[Docker Hub Images](https://hub.docker.com/_/ubuntu)                 | For Ubuntu usage and features.<br>To view Ubuntu's source and contribute.<br>For available Ubuntu Docker images. |
 | 4       | **Python**  | [Official Documentation](https://docs.python.org/3/)<br>[GitHub Repository](https://github.com/python/cpython)<br>[Docker Hub Images](https://hub.docker.com/_/python)                | For Python language and library details.<br>To view source and contribute.<br>For available Python Docker images. |
 | 5       | **OpenJDK** | [Official Documentation](https://openjdk.org/)<br>[GitHub Repository](https://github.com/openjdk/jdk)<br>[Docker Hub Images](https://hub.docker.com/_/openjdk)              | For OpenJDK features and guidelines.<br>To view source and contribute.<br>For available OpenJDK Docker images. |
+| 7       | **dotnet-node-python-openjdk Image on Docker Hub** | [Published Images on Docker Hub](https://hub.docker.com/repository/docker/vaibhavgawali/dotnet-node-python-openjdk)              | Docker images generated using dockerfile's of this repository are published here. |
